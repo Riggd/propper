@@ -181,10 +181,10 @@ const DESIGNER_GROUPS: Array<{
   icon: string;
   defaultCollapsed?: boolean;
 }> = [
-  { key: "interaction", label: "Make it Interactive", icon: "⚡" },
-  { key: "accessibility", label: "Screen Reader Support", icon: "♿" },
+  { key: "interaction", label: "Interactivity", icon: "⚡" },
+  { key: "accessibility", label: "Accessibility", icon: "♿" },
   { key: "states", label: "Visual States", icon: "🎛" },
-  { key: "handoff", label: "Dev Handoff", icon: "📋", defaultCollapsed: true },
+  { key: "handoff", label: "Developer-specific", icon: "📋", defaultCollapsed: true },
 ];
 
 function DesignerFinding({
@@ -407,7 +407,7 @@ export function ResultState({
                     }`}
                     onClick={() => setActiveTab("issues")}
                   >
-                    Issues ({result.findings.length})
+                    All Issues ({result.findings.length})
                   </button>
                   <button
                     className={`px-3 py-1.5 text-xs font-medium border-b-2 -mb-px transition-colors ${
@@ -417,7 +417,7 @@ export function ResultState({
                     }`}
                     onClick={() => setActiveTab("designer")}
                   >
-                    For Designer
+                    <span className="text-sm">🎨</span> For Designer
                   </button>
                 </div>
 
