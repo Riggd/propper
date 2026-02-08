@@ -5,6 +5,8 @@
   "private": true,
   "workspaces": ["proxy", "plugin", "cli"],
   "scripts": {
+    "dev": "npm run dev -w proxy -w plugin", 
+    "build:app": "npm run build -w proxy -w plugin", 
     "dev:proxy": "npm run dev --workspace=proxy",
     "dev:plugin": "npm run dev --workspace=plugin",
     "build:proxy": "npm run build --workspace=proxy",
