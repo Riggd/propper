@@ -154,6 +154,13 @@ export default function () {
 
     const frame = createCodeOnlyFrame();
     node.appendChild(frame);
+
+    // If the parent has auto layout, absolute positioning is required to
+    // prevent the frame from affecting flow and to respect the 0.01×0.01 size.
+    if ("layoutMode" in node && node.layoutMode !== "NONE") {
+      frame.layoutPositioning = "ABSOLUTE";
+    }
+
     return frame;
   }
 
