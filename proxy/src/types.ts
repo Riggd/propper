@@ -26,6 +26,7 @@ export interface ComponentRule {
 export interface RulesSchema {
   version: string;
   updatedAt: string;
+  sources?: string[];
   components: Record<string, ComponentRule>;
 }
 
