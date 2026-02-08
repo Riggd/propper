@@ -1,0 +1,12 @@
+{
+  "name": "Propper",
+  "id": "propper-plugin",
+  "api": "1.0.0",
+  "main": "src/main.ts",
+  "ui": "src/ui.tsx",
+  "networkAccess": {
+    "allowedDomains": ["*"],
+    "reasoning": "Needs access to local proxy server at http://localhost:3333 for component audits"
+  },
+  "editorType": ["figma"]
+}

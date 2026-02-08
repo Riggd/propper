@@ -1,0 +1,25 @@
+{
+  "name": "@propper/plugin",
+  "version": "1.0.0",
+  "description": "Propper — Figma plugin for code-ready component handoff",
+  "type": "module",
+  "scripts": {
+    "dev": "plugma dev",
+    "build": "plugma build",
+    "preview": "plugma preview"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.123.0",
+    "@types/react": "^18.2.55",
+    "@types/react-dom": "^18.2.19",
+    "autoprefixer": "^10.4.17",
+    "plugma": "latest",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.3.3"
+  }
+}

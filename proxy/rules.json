@@ -1,0 +1,101 @@
+{
+  "version": "1.0.0",
+  "updatedAt": "2026-02-07",
+  "components": {
+    "Button": {
+      "matchPatterns": ["button", "btn", "cta"],
+      "requiredBooleanProps": [
+        {
+          "name": "disabled",
+          "type": "BOOLEAN",
+          "level": "error",
+          "description": "Prevents interaction and signals unavailability to assistive tech"
+        },
+        {
+          "name": "loading",
+          "type": "BOOLEAN",
+          "level": "error",
+          "description": "Triggers spinner and disables interaction to prevent double-click"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onClick", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "() => void", "description": "Primary action handler" },
+        { "name": "onFocus", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "onBlur", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required when button has no visible text (icon-only)" },
+        { "name": "aria-disabled", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean" },
+        { "name": "aria-pressed", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "boolean", "description": "For toggle buttons" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "button" },
+        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "0" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Allows parent injection of layout styles" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "ref", "category": "tech", "figmaPropType": "none", "level": "info", "defaultValue": "React.Ref<HTMLButtonElement>" },
+        { "name": "type", "category": "config", "figmaPropType": "TEXT", "level": "error", "defaultValue": "button", "options": ["button", "submit", "reset"] },
+        { "name": "as", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "button", "description": "Polymorphic tag — renders as <a> for link-buttons" }
+      ]
+    },
+    "Input": {
+      "matchPatterns": ["input", "text.?field", "textfield", "text input", "search", "field"],
+      "requiredBooleanProps": [
+        {
+          "name": "disabled",
+          "type": "BOOLEAN",
+          "level": "error",
+          "description": "Prevents editing and signals unavailability"
+        },
+        {
+          "name": "error",
+          "type": "BOOLEAN",
+          "level": "error",
+          "description": "Triggers error styling and aria-invalid"
+        },
+        {
+          "name": "required",
+          "type": "BOOLEAN",
+          "level": "warning",
+          "description": "Marks field as required for form validation"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onChange", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "(value: string) => void" },
+        { "name": "onFocus", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "onBlur", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "onSubmit", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void", "description": "For search inputs" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required when no visible <label> is associated" },
+        { "name": "aria-describedby", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Links to helper/error text element ID" },
+        { "name": "aria-required", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean" },
+        { "name": "aria-invalid", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "error", "defaultValue": "boolean", "description": "Must be true when error state is active" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required for <label htmlFor> pairing" },
+        { "name": "name", "category": "tech", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required for form submission" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "type", "category": "config", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "text", "options": ["text", "email", "password", "number", "tel", "url", "search"] },
+        { "name": "value", "category": "config", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Controlled value" },
+        { "name": "defaultValue", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Uncontrolled default" },
+        { "name": "placeholder", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" }
+      ]
+    },
+    "Card": {
+      "matchPatterns": ["card", "tile", "panel", "item"],
+      "requiredBooleanProps": [
+        {
+          "name": "interactive",
+          "type": "BOOLEAN",
+          "level": "warning",
+          "description": "Signals the card is clickable — triggers hover/focus styles"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onClick", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void", "description": "Required if card is interactive" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Describes the card's purpose when no heading is present" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "article", "description": "Semantic role override" },
+        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "0", "description": "Required if card is interactive" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "as", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "div", "description": "Polymorphic tag" }
+      ]
+    }
+  }
+}

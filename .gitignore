@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS / Editor
+.DS_Store
+.vscode/
+*.swp
+*.swo
+
+# Plugma dev artifacts
+.plugma/
+
+# Claude Code memory
+memory/
+
+# Logs
+*.log
+npm-debug.log*
