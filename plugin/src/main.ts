@@ -113,8 +113,8 @@ export default function () {
   function createCodeOnlyFrame(): FrameNode {
     const frame = figma.createFrame();
     frame.name = "_Code Only Props";
-    frame.visible = false;
-    frame.resize(200, 20);
+    frame.resize(0.01, 0.01);
+    frame.locked = true;
     frame.layoutMode = "VERTICAL";
     frame.itemSpacing = 4;
     frame.paddingLeft = 8;
