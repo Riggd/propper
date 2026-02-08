@@ -3,6 +3,7 @@ import { program } from "commander";
 import fetch from "node-fetch";
 import { parseFigmaUrl, fetchFigmaNode, transformNodeToComponentData } from "./figma.js";
 import { printTerminal, printJson, printMarkdown } from "./output.js";
+import { resolveToken, saveToken, CONFIG_PATH } from "./config.js";
 
 const PROXY_URL = process.env.PROPPER_PROXY_URL ?? "http://localhost:3333";
 
@@ -19,12 +20,15 @@ program
   .option("--proxy <url>", "Proxy URL (default: http://localhost:3333)")
   .action(async (figmaUrl: string, options: { json?: boolean; markdown?: boolean; proxy?: string }) => {
     const proxyUrl = options.proxy ?? PROXY_URL;
-    const token = process.env.FIGMA_TOKEN;
+    const token = resolveToken();
 
     if (!token) {
       console.error(
-        "Error: FIGMA_TOKEN environment variable is required.\n" +
-        "Set it with: export FIGMA_TOKEN=your_personal_access_token"
+        "Error: Figma token not found.\n" +
+        "Set it with one of:\n" +
+        "  propper config set-token <token>\n" +
+        "  export FIGMA_TOKEN=your_token\n" +
+        "  echo 'FIGMA_TOKEN=your_token' >> .env"
       );
       process.exit(1);
     }
@@ -84,6 +88,16 @@ program
       );
       process.exit(1);
     }
+  });
+
+program
+  .command("config")
+  .description("Manage Propper configuration")
+  .command("set-token <token>")
+  .description(`Save your Figma personal access token to ${CONFIG_PATH}`)
+  .action((token: string) => {
+    saveToken(token);
+    console.log(`Token saved to ${CONFIG_PATH}`);
   });
 
 program.parse();
