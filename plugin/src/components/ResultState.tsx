@@ -141,6 +141,146 @@ function FindingGroup({
   );
 }
 
+// --- Designer Tab helpers ---
+
+function formatPropName(name: string): string {
+  let result = name;
+  // Strip leading "on" if followed by uppercase
+  if (/^on[A-Z]/.test(result)) result = result.slice(2);
+  // Strip leading "aria-"
+  else if (result.startsWith("aria-")) result = result.slice(5);
+  // Strip leading "data-"
+  else if (result.startsWith("data-")) result = result.slice(5);
+  // Split camelCase into words
+  result = result.replace(/([a-z])([A-Z])/g, "$1 $2");
+  // Title-case
+  return result
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+function extractDescription(message: string): string | null {
+  const idx = message.indexOf(" — ");
+  if (idx === -1) return null;
+  return message.slice(idx + 3).trim() || null;
+}
+
+function getDesignerCategory(finding: AuditFinding): string {
+  if (!finding.autoFixData) return "states";
+  const cat = finding.autoFixData.propCategory;
+  if (cat === "event") return "interaction";
+  if (cat === "a11y") return "accessibility";
+  if (cat === "tech" || cat === "config") return "handoff";
+  return "states";
+}
+
+const DESIGNER_GROUPS: Array<{
+  key: string;
+  label: string;
+  icon: string;
+  defaultCollapsed?: boolean;
+}> = [
+  { key: "interaction", label: "Interactivity", icon: "⚡" },
+  { key: "accessibility", label: "Accessibility", icon: "♿" },
+  { key: "states", label: "Visual States", icon: "🎛" },
+  { key: "handoff", label: "Developer-specific", icon: "📋", defaultCollapsed: true },
+];
+
+function DesignerFinding({
+  finding,
+  index,
+  selected,
+  onToggle,
+}: {
+  finding: AuditFinding;
+  index: number;
+  selected: boolean;
+  onToggle: (i: number) => void;
+}) {
+  const fixable = !!finding.autoFixData;
+  const friendlyName = finding.autoFixData
+    ? formatPropName(finding.autoFixData.propName)
+    : finding.message.split(" — ")[0];
+  const description = extractDescription(finding.message);
+
+  return (
+    <label className={`flex items-start gap-2 text-[11px] px-2 py-2 rounded border border-gray-200 bg-white ${fixable ? "cursor-pointer" : ""}`}>
+      {fixable ? (
+        <input
+          type="checkbox"
+          className="mt-0.5 shrink-0"
+          checked={selected}
+          onChange={() => onToggle(index)}
+        />
+      ) : (
+        <span className="w-3.5 shrink-0" />
+      )}
+      <span className="flex-1 min-w-0">
+        <span className="font-semibold text-gray-800">{friendlyName}</span>
+        {finding.autoFixData && (
+          <code className="ml-1.5 px-1 py-0.5 bg-gray-100 rounded text-[10px] text-gray-500 font-mono">
+            {finding.autoFixData.propName}
+          </code>
+        )}
+        {description && (
+          <span className="block text-gray-500 text-[10px] mt-0.5">{description}</span>
+        )}
+      </span>
+    </label>
+  );
+}
+
+function DesignerGroup({
+  groupKey,
+  label,
+  icon,
+  defaultCollapsed,
+  findings,
+  selectedIndices,
+  onToggle,
+}: {
+  groupKey: string;
+  label: string;
+  icon: string;
+  defaultCollapsed?: boolean;
+  findings: Array<{ finding: AuditFinding; originalIndex: number }>;
+  selectedIndices: Set<number>;
+  onToggle: (i: number) => void;
+}) {
+  const [collapsed, setCollapsed] = useState(!!defaultCollapsed);
+  if (findings.length === 0) return null;
+
+  return (
+    <div className="space-y-1">
+      <button
+        className="flex items-center gap-1.5 w-full text-left"
+        onClick={() => setCollapsed((c) => !c)}
+      >
+        <span className="text-sm">{icon}</span>
+        <span className="text-[10px] font-semibold uppercase tracking-wide text-gray-600">
+          {label}
+        </span>
+        <span className="ml-1 text-[10px] text-gray-400">({findings.length})</span>
+        <span className="ml-auto text-[10px] text-gray-400">{collapsed ? "▸" : "▾"}</span>
+      </button>
+      {!collapsed && (
+        <div className="space-y-1 pl-1">
+          {findings.map(({ finding, originalIndex }) => (
+            <DesignerFinding
+              key={originalIndex}
+              finding={finding}
+              index={originalIndex}
+              selected={selectedIndices.has(originalIndex)}
+              onToggle={onToggle}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function ResultState({
   componentData,
   result,
@@ -152,6 +292,7 @@ export function ResultState({
   onBack,
 }: ResultStateProps) {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
+  const [activeTab, setActiveTab] = useState<"issues" | "designer">("issues");
 
   // Reset selection when result changes — pre-select all error-level fixable findings
   useEffect(() => {
@@ -180,6 +321,14 @@ export function ResultState({
     findings: (result?.findings ?? [])
       .map((f, i) => ({ finding: f, originalIndex: i }))
       .filter(({ finding }) => finding.type === type),
+  }));
+
+  // Group findings by designer category
+  const designerGroups = DESIGNER_GROUPS.map((g) => ({
+    ...g,
+    findings: (result?.findings ?? [])
+      .map((f, i) => ({ finding: f, originalIndex: i }))
+      .filter(({ finding }) => getDesignerCategory(finding) === g.key),
   }));
 
   const fixableCount = result?.findings.filter((f) => f.autoFixData).length ?? 0;
@@ -245,26 +394,66 @@ export function ResultState({
               />
             </div>
 
-            {/* Findings grouped by severity */}
+            {/* Findings area */}
             {result.findings.length > 0 && (
               <div className="space-y-3">
-                <p className="text-xs font-semibold text-gray-700">
-                  Issues ({result.findings.length})
-                  {fixableCount > 0 && (
-                    <span className="ml-1 font-normal text-gray-400">
-                      — select which to fix
-                    </span>
-                  )}
-                </p>
-                {groups.map(({ type, findings }) => (
-                  <FindingGroup
-                    key={type}
-                    type={type}
-                    findings={findings}
-                    selectedIndices={selectedIndices}
-                    onToggle={toggleFinding}
-                  />
-                ))}
+                {/* Tab header */}
+                <div className="flex border-b border-gray-200">
+                  <button
+                    className={`px-3 py-1.5 text-xs font-medium border-b-2 -mb-px transition-colors ${
+                      activeTab === "issues"
+                        ? "border-sky-600 text-sky-700"
+                        : "border-transparent text-gray-500 hover:text-gray-700"
+                    }`}
+                    onClick={() => setActiveTab("issues")}
+                  >
+                    All Issues ({result.findings.length})
+                  </button>
+                  <button
+                    className={`px-3 py-1.5 text-xs font-medium border-b-2 -mb-px transition-colors ${
+                      activeTab === "designer"
+                        ? "border-sky-600 text-sky-700"
+                        : "border-transparent text-gray-500 hover:text-gray-700"
+                    }`}
+                    onClick={() => setActiveTab("designer")}
+                  >
+                    <span className="text-sm">🎨</span> For Designer
+                  </button>
+                </div>
+
+                {activeTab === "issues" && (
+                  <div className="space-y-3">
+                    {fixableCount > 0 && (
+                      <p className="text-[10px] text-gray-400">— select which to fix</p>
+                    )}
+                    {groups.map(({ type, findings }) => (
+                      <FindingGroup
+                        key={type}
+                        type={type}
+                        findings={findings}
+                        selectedIndices={selectedIndices}
+                        onToggle={toggleFinding}
+                      />
+                    ))}
+                  </div>
+                )}
+
+                {activeTab === "designer" && (
+                  <div className="space-y-3">
+                    {designerGroups.map(({ key, label, icon, defaultCollapsed, findings }) => (
+                      <DesignerGroup
+                        key={key}
+                        groupKey={key}
+                        label={label}
+                        icon={icon}
+                        defaultCollapsed={defaultCollapsed}
+                        findings={findings}
+                        selectedIndices={selectedIndices}
+                        onToggle={toggleFinding}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
