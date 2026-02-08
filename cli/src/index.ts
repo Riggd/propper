@@ -3,7 +3,7 @@ import { program } from "commander";
 import fetch from "node-fetch";
 import { parseFigmaUrl, fetchFigmaNode, transformNodeToComponentData } from "./figma.js";
 import { printTerminal, printJson, printMarkdown } from "./output.js";
-import { resolveToken, saveToken, CONFIG_PATH } from "./config.js";
+import { resolveToken, saveToken, promptToken, CONFIG_PATH } from "./config.js";
 
 const PROXY_URL = process.env.PROPPER_PROXY_URL ?? "http://localhost:3333";
 
@@ -93,9 +93,14 @@ program
 program
   .command("config")
   .description("Manage Propper configuration")
-  .command("set-token <token>")
-  .description(`Save your Figma personal access token to ${CONFIG_PATH}`)
-  .action((token: string) => {
+  .command("set-token")
+  .description(`Securely save your Figma personal access token to ${CONFIG_PATH}`)
+  .action(async () => {
+    const token = await promptToken();
+    if (!token) {
+      console.error("No token entered.");
+      process.exit(1);
+    }
     saveToken(token);
     console.log(`Token saved to ${CONFIG_PATH}`);
   });
