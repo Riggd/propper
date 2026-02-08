@@ -59,6 +59,11 @@ Each component in `rules.json` defines:
 - Requires `FIGMA_TOKEN` env var; supports `--json` and `--markdown` output formats
 - Exits with code 1 if any `error`-level findings exist (CI/CD compatible)
 
+## Git Workflow
+
+- **Never push directly to `main`** — all changes go through pull requests
+- Create a feature branch, push, and open a PR for every change
+
 ## Key Files
 - `proxy/rules.json` — The component rules dictionary (source of truth; edit this to add/change requirements)
 - `plugin/src/main.ts` — All Figma API interactions (extraction + scaffolding)
