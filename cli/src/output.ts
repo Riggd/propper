@@ -15,6 +15,12 @@ interface AuditResult {
   }>;
 }
 
+const SEVERITY_ORDER = { error: 0, warning: 1, info: 2 };
+
+function sortedFindings(findings: AuditResult["findings"]) {
+  return [...findings].sort((a, b) => SEVERITY_ORDER[a.type] - SEVERITY_ORDER[b.type]);
+}
+
 function scoreColor(score: number) {
   if (score >= 80) return chalk.green;
   if (score >= 50) return chalk.yellow;
@@ -64,7 +70,7 @@ export function printTerminal(
   if (result.findings.length > 0) {
     console.log();
     console.log("  Findings:");
-    for (const finding of result.findings) {
+    for (const finding of sortedFindings(result.findings)) {
       console.log(`    ${levelIcon(finding.type)} ${finding.message}`);
     }
   } else {
@@ -101,7 +107,7 @@ export function printMarkdown(
 
   if (result.findings.length > 0) {
     lines.push("### Findings", "");
-    for (const f of result.findings) {
+    for (const f of sortedFindings(result.findings)) {
       const icon = f.type === "error" ? "🔴" : f.type === "warning" ? "🟡" : "🔵";
       lines.push(`- ${icon} **[${f.type.toUpperCase()}]** ${f.message}`);
     }
