@@ -1,9 +1,18 @@
 {
-  "version": "1.0.0",
-  "updatedAt": "2026-02-07",
+  "version": "2.0.0",
+  "updatedAt": "2026-02-09",
+  "sources": [
+    "southleft-ds-mcp: Button Component Design Guidelines",
+    "southleft-ds-mcp: Checkbox Blueprints",
+    "southleft-ds-mcp: Switch Toggle Blueprints",
+    "southleft-ds-mcp: Radio Button Blueprints",
+    "southleft-ds-mcp: Tabs Blueprints",
+    "southleft-ds-mcp: ARIA Component Patterns (WAI-ARIA APG)",
+    "southleft-ds-mcp: Design Systems Directories (60+ design systems analyzed)"
+  ],
   "components": {
     "Button": {
-      "matchPatterns": ["button", "btn", "cta"],
+      "matchPatterns": ["button", "btn", "cta", "action.?button", "icon.?button"],
       "requiredBooleanProps": [
         {
           "name": "disabled",
@@ -15,28 +24,31 @@
           "name": "loading",
           "type": "BOOLEAN",
           "level": "error",
-          "description": "Triggers spinner and disables interaction to prevent double-click"
+          "description": "Triggers spinner and disables interaction to prevent double-click during async operations"
         }
       ],
       "codeOnlyProps": [
-        { "name": "onClick", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "() => void", "description": "Primary action handler" },
-        { "name": "onFocus", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "onClick", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "() => void", "description": "Primary action handler — triggers action or event like form submission, dialog opening, or delete operation" },
+        { "name": "onFocus", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void", "description": "Focus event for keyboard navigation feedback" },
         { "name": "onBlur", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
-        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required when button has no visible text (icon-only)" },
-        { "name": "aria-disabled", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean" },
-        { "name": "aria-pressed", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "boolean", "description": "For toggle buttons" },
+        { "name": "onKeyDown", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void", "description": "Keyboard event handler for custom key interactions" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required when button has no visible text (icon-only buttons). Must provide descriptive label for screen readers" },
+        { "name": "aria-disabled", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean", "description": "Communicates disabled state to assistive tech while keeping element focusable" },
+        { "name": "aria-pressed", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "boolean", "description": "For toggle buttons — indicates current pressed state" },
+        { "name": "aria-expanded", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "boolean", "description": "For menu buttons — indicates whether controlled element is expanded or collapsed" },
+        { "name": "aria-haspopup", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "false", "description": "Indicates button opens a menu, listbox, dialog, or other popup" },
         { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "button" },
-        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "0" },
+        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "0", "description": "Keyboard focusability — set to -1 to remove from tab order" },
         { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
         { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Allows parent injection of layout styles" },
         { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
         { "name": "ref", "category": "tech", "figmaPropType": "none", "level": "info", "defaultValue": "React.Ref<HTMLButtonElement>" },
-        { "name": "type", "category": "config", "figmaPropType": "TEXT", "level": "error", "defaultValue": "button", "options": ["button", "submit", "reset"] },
+        { "name": "type", "category": "config", "figmaPropType": "TEXT", "level": "error", "defaultValue": "button", "options": ["button", "submit", "reset"], "description": "Semantic HTML button type — prevents accidental form submission" },
         { "name": "as", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "button", "description": "Polymorphic tag — renders as <a> for link-buttons" }
       ]
     },
     "Input": {
-      "matchPatterns": ["input", "text.?field", "textfield", "text input", "search", "field"],
+      "matchPatterns": ["input", "text.?field", "textfield", "text.?input", "search", "field", "text.?area"],
       "requiredBooleanProps": [
         {
           "name": "disabled",
@@ -55,17 +67,25 @@
           "type": "BOOLEAN",
           "level": "warning",
           "description": "Marks field as required for form validation"
+        },
+        {
+          "name": "readOnly",
+          "type": "BOOLEAN",
+          "level": "info",
+          "description": "Allows focusing but prevents editing — differs from disabled in that value is still submitted"
         }
       ],
       "codeOnlyProps": [
-        { "name": "onChange", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "(value: string) => void" },
+        { "name": "onChange", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "(value: string) => void", "description": "Value change handler for controlled input" },
         { "name": "onFocus", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
-        { "name": "onBlur", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
-        { "name": "onSubmit", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void", "description": "For search inputs" },
+        { "name": "onBlur", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void", "description": "Blur handler — often triggers validation" },
+        { "name": "onSubmit", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void", "description": "For search inputs — handles Enter key submission" },
+        { "name": "onKeyDown", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void", "description": "Keyboard event handler for custom key interactions" },
         { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required when no visible <label> is associated" },
-        { "name": "aria-describedby", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Links to helper/error text element ID" },
+        { "name": "aria-describedby", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Links to helper/error text element ID for screen readers" },
         { "name": "aria-required", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean" },
         { "name": "aria-invalid", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "error", "defaultValue": "boolean", "description": "Must be true when error state is active" },
+        { "name": "aria-errormessage", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Points to element ID containing error message text" },
         { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required for <label htmlFor> pairing" },
         { "name": "name", "category": "tech", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required for form submission" },
         { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
@@ -73,7 +93,10 @@
         { "name": "type", "category": "config", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "text", "options": ["text", "email", "password", "number", "tel", "url", "search"] },
         { "name": "value", "category": "config", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Controlled value" },
         { "name": "defaultValue", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Uncontrolled default" },
-        { "name": "placeholder", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" }
+        { "name": "placeholder", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "autoComplete", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "off", "options": ["on", "off", "name", "email", "tel", "url", "current-password", "new-password"], "description": "Browser autocomplete hint — improves UX for common field types" },
+        { "name": "maxLength", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Maximum character limit" },
+        { "name": "pattern", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Regex validation pattern for native form validation" }
       ]
     },
     "Card": {
@@ -83,18 +106,300 @@
           "name": "interactive",
           "type": "BOOLEAN",
           "level": "warning",
-          "description": "Signals the card is clickable — triggers hover/focus styles"
+          "description": "Signals the card is clickable — triggers hover/focus styles and requires onClick, tabIndex, keyboard handling"
         }
       ],
       "codeOnlyProps": [
         { "name": "onClick", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void", "description": "Required if card is interactive" },
+        { "name": "onKeyDown", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void", "description": "Required for keyboard activation on interactive cards (Enter/Space)" },
         { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Describes the card's purpose when no heading is present" },
-        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "article", "description": "Semantic role override" },
+        { "name": "aria-describedby", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Links to card description or summary content" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "article", "description": "Semantic role — use 'button' for fully interactive cards, 'article' for content cards" },
         { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "0", "description": "Required if card is interactive" },
         { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
         { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
         { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
-        { "name": "as", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "div", "description": "Polymorphic tag" }
+        { "name": "as", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "div", "description": "Polymorphic tag — use 'a' for link cards, 'article' for content cards" }
+      ]
+    },
+    "Checkbox": {
+      "matchPatterns": ["checkbox", "check.?box", "check.?mark", "tick.?box", "selection.?box"],
+      "requiredBooleanProps": [
+        {
+          "name": "disabled",
+          "type": "BOOLEAN",
+          "level": "error",
+          "description": "Non-interactive state — appears faded/greyed out, not available for interaction"
+        },
+        {
+          "name": "error",
+          "type": "BOOLEAN",
+          "level": "warning",
+          "description": "Error state — indicates selection needs to be made or current selection is invalid"
+        },
+        {
+          "name": "indeterminate",
+          "type": "BOOLEAN",
+          "level": "info",
+          "description": "Mixed/partially-checked condition — used in hierarchical checkboxes to indicate partial selection among related items"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onChange", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "(checked: boolean) => void", "description": "Toggles state between selected and unselected" },
+        { "name": "onFocus", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "onBlur", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required when checkbox has no visible label — describes the binary choice" },
+        { "name": "aria-checked", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "false", "options": ["true", "false", "mixed"], "description": "Tri-state: true/false/mixed. Mixed state for hierarchical partial selection" },
+        { "name": "aria-describedby", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Links to description text supplementing the label" },
+        { "name": "aria-required", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean", "description": "Indicates the checkbox must be checked before form submission" },
+        { "name": "aria-invalid", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean", "description": "Must be true when error state is active" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "checkbox", "description": "Native checkbox role — override only for custom implementations" },
+        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "0" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required for <label htmlFor> pairing" },
+        { "name": "name", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Required for form submission" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "checked", "category": "config", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "false", "description": "Controlled checked state" },
+        { "name": "defaultChecked", "category": "config", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "false", "description": "Uncontrolled default checked state" },
+        { "name": "value", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Value submitted with form when checked" }
+      ]
+    },
+    "Switch": {
+      "matchPatterns": ["switch", "toggle", "toggler"],
+      "requiredBooleanProps": [
+        {
+          "name": "disabled",
+          "type": "BOOLEAN",
+          "level": "error",
+          "description": "Non-interactive state — displayed as greyed out or visually muted"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onChange", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "(checked: boolean) => void", "description": "Toggle handler — switch has instantaneous effect, no separate save action needed" },
+        { "name": "onFocus", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "onBlur", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required — describes the setting being toggled (e.g. 'Enable notifications')" },
+        { "name": "aria-checked", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "error", "defaultValue": "boolean", "description": "Binary on/off state — must reflect current visual state" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "switch", "description": "WAI-ARIA switch role — distinguishes from checkbox (immediate vs deferred action)" },
+        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "0" },
+        { "name": "aria-describedby", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Links to additional description of what the switch controls" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "name", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "checked", "category": "config", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "false", "description": "Controlled on/off state" },
+        { "name": "defaultChecked", "category": "config", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "false", "description": "Uncontrolled default state" }
+      ]
+    },
+    "RadioButton": {
+      "matchPatterns": ["radio", "radio.?button", "radio.?group", "option.?button"],
+      "requiredBooleanProps": [
+        {
+          "name": "disabled",
+          "type": "BOOLEAN",
+          "level": "error",
+          "description": "Non-interactive state for the radio button"
+        },
+        {
+          "name": "error",
+          "type": "BOOLEAN",
+          "level": "warning",
+          "description": "Error state — indicates an issue with the selection"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onChange", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "(value: string) => void", "description": "Selection change handler — only one radio in a group can be selected at a time" },
+        { "name": "onFocus", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "onBlur", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required when no visible label — labels are crucial for radio buttons" },
+        { "name": "aria-checked", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean", "description": "Selected state of the radio button" },
+        { "name": "aria-describedby", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Links to optional description text" },
+        { "name": "aria-required", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean", "description": "Indicates a selection must be made in the radio group" },
+        { "name": "aria-invalid", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean", "description": "Error state for the radio group" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "radio", "description": "Semantic role — group container should use role='radiogroup'" },
+        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "0" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required for <label htmlFor> pairing" },
+        { "name": "name", "category": "tech", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Groups radio buttons together — only one per name can be selected" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "value", "category": "config", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "The value associated with this radio option" },
+        { "name": "checked", "category": "config", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "false", "description": "Controlled selection state" }
+      ]
+    },
+    "Select": {
+      "matchPatterns": ["select", "dropdown", "drop.?down", "combobox", "combo.?box", "listbox", "list.?box", "picker"],
+      "requiredBooleanProps": [
+        {
+          "name": "disabled",
+          "type": "BOOLEAN",
+          "level": "error",
+          "description": "Prevents interaction with the select"
+        },
+        {
+          "name": "error",
+          "type": "BOOLEAN",
+          "level": "warning",
+          "description": "Error state for validation feedback"
+        },
+        {
+          "name": "open",
+          "type": "BOOLEAN",
+          "level": "info",
+          "description": "Controls whether the dropdown list is expanded"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onChange", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "(value: string) => void", "description": "Selection change handler" },
+        { "name": "onFocus", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "onBlur", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void" },
+        { "name": "onOpenChange", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "(open: boolean) => void", "description": "Callback when dropdown opens/closes" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required when no visible label is associated" },
+        { "name": "aria-expanded", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "error", "defaultValue": "boolean", "description": "Indicates whether the dropdown is open — must sync with visual state" },
+        { "name": "aria-haspopup", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "listbox", "description": "Indicates the select has an associated popup" },
+        { "name": "aria-activedescendant", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "ID of currently highlighted option for screen readers" },
+        { "name": "aria-required", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean" },
+        { "name": "aria-invalid", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "boolean", "description": "Must be true when error state is active" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "combobox", "description": "For custom selects — native <select> has implicit role" },
+        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "0" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required for <label htmlFor> pairing" },
+        { "name": "name", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Required for form submission" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "value", "category": "config", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Currently selected value" },
+        { "name": "defaultValue", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Uncontrolled default selection" },
+        { "name": "placeholder", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Placeholder text when no selection is made" },
+        { "name": "multiple", "category": "config", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "false", "description": "Allow multiple selections" }
+      ]
+    },
+    "Modal": {
+      "matchPatterns": ["modal", "dialog", "dialogue", "alert.?dialog", "overlay", "lightbox"],
+      "requiredBooleanProps": [
+        {
+          "name": "open",
+          "type": "BOOLEAN",
+          "level": "error",
+          "description": "Controls modal visibility — window overlaid on primary content"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onClose", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "() => void", "description": "Close handler — must be provided to allow dismissal" },
+        { "name": "onOpenChange", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "(open: boolean) => void", "description": "Callback when modal opens/closes" },
+        { "name": "onAfterOpen", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void", "description": "Called after modal opens — useful for focusing first interactive element" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Labels the dialog when no visible title is present" },
+        { "name": "aria-labelledby", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Points to the element ID of the modal's title — required for accessible dialog" },
+        { "name": "aria-describedby", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Points to element ID describing the dialog content" },
+        { "name": "aria-modal", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "error", "defaultValue": "true", "description": "Indicates content underneath is inert — must be true for modal dialogs" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "dialog", "options": ["dialog", "alertdialog"], "description": "Use 'alertdialog' for confirmation/destructive actions requiring immediate response" },
+        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "-1", "description": "Modal container should be focusable but not in tab order" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "trapFocus", "category": "config", "figmaPropType": "BOOLEAN", "level": "error", "defaultValue": "true", "description": "Focus must be trapped inside modal — Tab/Shift+Tab cycles within dialog" },
+        { "name": "closeOnOverlayClick", "category": "config", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "true", "description": "Whether clicking the overlay/backdrop closes the modal" },
+        { "name": "closeOnEscape", "category": "config", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "true", "description": "Whether pressing Escape closes the modal — expected behavior per WAI-ARIA" },
+        { "name": "returnFocus", "category": "config", "figmaPropType": "BOOLEAN", "level": "warning", "defaultValue": "true", "description": "Returns focus to the trigger element when modal closes" }
+      ]
+    },
+    "Tabs": {
+      "matchPatterns": ["tabs", "tab.?bar", "tab.?list", "tab.?group", "tab.?navigation"],
+      "requiredBooleanProps": [
+        {
+          "name": "disabled",
+          "type": "BOOLEAN",
+          "level": "warning",
+          "description": "Disables specific tab item — appears faded/greyed, not available for interaction"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onChange", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "(value: string) => void", "description": "Tab selection change handler — only one tab active at a time" },
+        { "name": "onFocus", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Labels the tab list for screen readers when purpose isn't clear from context" },
+        { "name": "aria-selected", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "error", "defaultValue": "boolean", "description": "Marks the currently active tab — must be true for selected, false for others" },
+        { "name": "aria-controls", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Each tab must point to the ID of its associated tab panel" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "tablist", "options": ["tablist", "tab", "tabpanel"], "description": "Container uses 'tablist', items use 'tab', content uses 'tabpanel'" },
+        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "0", "description": "Active tab has tabIndex 0, inactive tabs have -1 (roving tabindex pattern)" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Required for aria-controls/aria-labelledby pairing" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "value", "category": "config", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Currently selected tab value" },
+        { "name": "defaultValue", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Default selected tab on initial render" },
+        { "name": "orientation", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "horizontal", "options": ["horizontal", "vertical"], "description": "Layout direction — affects arrow key navigation (left/right vs up/down)" }
+      ]
+    },
+    "Accordion": {
+      "matchPatterns": ["accordion", "expandable", "collapsible", "disclosure", "expand.?panel"],
+      "requiredBooleanProps": [
+        {
+          "name": "disabled",
+          "type": "BOOLEAN",
+          "level": "warning",
+          "description": "Prevents expanding/collapsing the accordion section"
+        },
+        {
+          "name": "expanded",
+          "type": "BOOLEAN",
+          "level": "warning",
+          "description": "Controls whether content is visible (expanded) or hidden (collapsed)"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onChange", "category": "event", "figmaPropType": "none", "level": "error", "defaultValue": "(expanded: boolean) => void", "description": "Expand/collapse toggle handler" },
+        { "name": "aria-expanded", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "error", "defaultValue": "boolean", "description": "Indicates whether the controlled section is expanded or collapsed" },
+        { "name": "aria-controls", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Points to the ID of the expandable content panel" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Accessible name for the accordion when title isn't sufficient" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "region", "description": "Expanded panel should use role='region' with aria-labelledby pointing to header" },
+        { "name": "tabIndex", "category": "a11y", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "0" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Required for aria-controls/aria-labelledby pairing" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "defaultExpanded", "category": "config", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "false", "description": "Whether the section is expanded on initial render" },
+        { "name": "allowMultiple", "category": "config", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "false", "description": "Whether multiple sections can be expanded simultaneously" }
+      ]
+    },
+    "Alert": {
+      "matchPatterns": ["alert", "alert.?banner", "notification", "toast", "snackbar", "inline.?message", "message.?bar"],
+      "requiredBooleanProps": [
+        {
+          "name": "dismissible",
+          "type": "BOOLEAN",
+          "level": "warning",
+          "description": "Whether the alert can be dismissed by the user"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onDismiss", "category": "event", "figmaPropType": "none", "level": "warning", "defaultValue": "() => void", "description": "Handler called when alert is dismissed" },
+        { "name": "onAction", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "() => void", "description": "Handler for the primary action button within the alert" },
+        { "name": "aria-label", "category": "a11y", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Accessible name when alert content isn't self-describing" },
+        { "name": "aria-live", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "polite", "options": ["polite", "assertive", "off"], "description": "Controls how screen readers announce the alert — 'assertive' interrupts, 'polite' waits" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "alert", "options": ["alert", "status", "log"], "description": "Semantic role — 'alert' for important messages, 'status' for non-urgent updates" },
+        { "name": "aria-atomic", "category": "a11y", "figmaPropType": "BOOLEAN", "level": "info", "defaultValue": "true", "description": "Screen reader announces entire alert region, not just changes" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "variant", "category": "config", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "info", "options": ["info", "success", "warning", "error"], "description": "Visual severity/type of the alert" },
+        { "name": "autoClose", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "", "description": "Duration in ms before auto-dismissal (for toasts/snackbars)" }
+      ]
+    },
+    "Tooltip": {
+      "matchPatterns": ["tooltip", "tool.?tip", "popover", "hint"],
+      "requiredBooleanProps": [
+        {
+          "name": "visible",
+          "type": "BOOLEAN",
+          "level": "info",
+          "description": "Controls tooltip visibility — shows on hover/focus by default"
+        }
+      ],
+      "codeOnlyProps": [
+        { "name": "onOpenChange", "category": "event", "figmaPropType": "none", "level": "info", "defaultValue": "(open: boolean) => void", "description": "Callback when tooltip shows/hides" },
+        { "name": "aria-describedby", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Trigger element must point to the tooltip ID via aria-describedby" },
+        { "name": "role", "category": "a11y", "figmaPropType": "TEXT", "level": "error", "defaultValue": "tooltip", "description": "WAI-ARIA tooltip role — popup that displays on hover/focus" },
+        { "name": "id", "category": "tech", "figmaPropType": "TEXT", "level": "error", "defaultValue": "", "description": "Required — trigger references this via aria-describedby" },
+        { "name": "className", "category": "tech", "figmaPropType": "TEXT", "level": "info", "defaultValue": "" },
+        { "name": "data-testid", "category": "tech", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "" },
+        { "name": "content", "category": "config", "figmaPropType": "TEXT", "level": "warning", "defaultValue": "", "description": "Tooltip text content" },
+        { "name": "placement", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "top", "options": ["top", "bottom", "left", "right"], "description": "Preferred tooltip position relative to trigger" },
+        { "name": "delay", "category": "config", "figmaPropType": "TEXT", "level": "info", "defaultValue": "200", "description": "Delay in ms before showing tooltip on hover" }
       ]
     }
   }

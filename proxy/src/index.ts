@@ -56,15 +56,25 @@ app.get("/rules", (_req, res) => {
  * Returns API documentation and schema examples
  */
 app.get("/docs", (_req, res) => {
+  const componentSummary: Record<string, { matchPatterns: string[]; requiredProps: number; codeOnlyProps: number }> = {};
+  for (const [name, rule] of Object.entries(rules.components)) {
+    componentSummary[name] = {
+      matchPatterns: rule.matchPatterns,
+      requiredProps: rule.requiredBooleanProps.length,
+      codeOnlyProps: rule.codeOnlyProps.length,
+    };
+  }
+
   res.json({
     version: rules.version,
+    sources: rules.sources || [],
     endpoints: {
       "POST /audit": {
         description: "Audit a Figma component against the rules engine",
         requestBody: {
           componentData: {
             id: "string",
-            name: "string (e.g. 'Button/Primary')",
+            name: "string (e.g. 'Button/Primary', 'Checkbox/Default', 'Modal/Confirmation')",
             type: "string (e.g. 'COMPONENT')",
             componentProperties:
               "Record<string, { type: 'BOOLEAN'|'VARIANT'|'TEXT', value: boolean|string }>",
@@ -92,6 +102,7 @@ app.get("/docs", (_req, res) => {
       },
     },
     supportedComponents: Object.keys(rules.components),
+    componentDetails: componentSummary,
   });
 });
 

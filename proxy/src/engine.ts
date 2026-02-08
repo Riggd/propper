@@ -59,7 +59,7 @@ export function auditComponent(
         {
           type: "error",
           check: "props",
-          message: `Component "${componentData.name}" does not match any known component type (Button, Input, Card).`,
+          message: `Component "${componentData.name}" does not match any known component type. Supported: ${Object.keys(rules.components).join(", ")}.`,
         },
       ],
     };
