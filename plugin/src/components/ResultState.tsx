@@ -12,68 +12,7 @@ interface ResultStateProps {
   onBack: () => void;
 }
 
-function ScoreRing({ score }: { score: number }) {
-  const color = score >= 80 ? "#16a34a" : score >= 50 ? "#d97706" : "#dc2626";
-  return (
-    <div
-      className="w-14 h-14 rounded-full flex items-center justify-center border-4 font-bold text-lg"
-      style={{ borderColor: color, color }}
-    >
-      {score}
-    </div>
-  );
-}
-
-function CheckRow({
-  label,
-  passed,
-  total,
-}: {
-  label: string;
-  passed: number;
-  total: number;
-}) {
-  const ok = passed === total;
-  return (
-    <div className="flex items-center justify-between py-1.5 border-b border-gray-100 last:border-0">
-      <div className="flex items-center gap-2">
-        <span
-          className="w-4 h-4 rounded-full text-[10px] flex items-center justify-center font-bold text-white"
-          style={{ backgroundColor: ok ? "#16a34a" : "#dc2626" }}
-        >
-          {ok ? "✓" : "✗"}
-        </span>
-        <span className="text-xs text-gray-700">{label}</span>
-      </div>
-      <span className="text-xs text-gray-500">
-        {passed}/{total}
-      </span>
-    </div>
-  );
-}
-
-const SEVERITY_CONFIG = {
-  error: {
-    label: "Errors",
-    colors: "bg-red-50 border-red-200 text-red-700",
-    badge: "ERR",
-    headerColor: "text-red-700",
-  },
-  warning: {
-    label: "Warnings",
-    colors: "bg-amber-50 border-amber-200 text-amber-700",
-    badge: "WARN",
-    headerColor: "text-amber-700",
-  },
-  info: {
-    label: "Info",
-    colors: "bg-blue-50 border-blue-200 text-blue-700",
-    badge: "INFO",
-    headerColor: "text-blue-700",
-  },
-} as const;
-
-function FindingItem({
+function FindingCard({
   finding,
   index,
   selected,
@@ -84,59 +23,52 @@ function FindingItem({
   selected: boolean;
   onToggle: (i: number) => void;
 }) {
-  const { colors, badge } = SEVERITY_CONFIG[finding.type];
   const fixable = !!finding.autoFixData;
+  const borderColor =
+    finding.type === "error" ? "#dc2626" : finding.type === "warning" ? "#d97706" : "#2563eb";
 
   return (
-    <label
-      className={`flex items-start gap-2 text-[11px] px-2 py-1.5 rounded border ${colors} ${fixable ? "cursor-pointer" : ""}`}
+    <div
+      className="finding-card animate-slide-up"
+      style={{ borderLeftColor: borderColor, animationDelay: `${index * 50}ms` }}
     >
-      {fixable ? (
-        <input
-          type="checkbox"
-          className="mt-0.5 shrink-0 accent-current"
-          checked={selected}
-          onChange={() => onToggle(index)}
-        />
-      ) : (
-        <span className="w-3.5 shrink-0" />
-      )}
-      <span>
-        <span className="font-semibold mr-1">[{badge}]</span>
-        {finding.message}
-      </span>
-    </label>
+      <div className="flex items-start gap-3">
+        {fixable && (
+          <input
+            type="checkbox"
+            className="mt-0.5 shrink-0 accent-propper-600 w-4 h-4"
+            checked={selected}
+            onChange={() => onToggle(index)}
+          />
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-xs text-propper-700">
+            {finding.autoFixData?.propName ?? finding.check}
+          </p>
+          <p className="text-[11px] text-propper-400 mt-0.5 leading-relaxed">{finding.message}</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
-function FindingGroup({
-  type,
-  findings,
-  selectedIndices,
-  onToggle,
+function SectionHeader({
+  icon,
+  title,
+  count,
+  color,
 }: {
-  type: keyof typeof SEVERITY_CONFIG;
-  findings: Array<{ finding: AuditFinding; originalIndex: number }>;
-  selectedIndices: Set<number>;
-  onToggle: (i: number) => void;
+  icon: string;
+  title: string;
+  count: number;
+  color: string;
 }) {
-  if (findings.length === 0) return null;
-  const { label, headerColor } = SEVERITY_CONFIG[type];
-
   return (
-    <div className="space-y-1">
-      <p className={`text-[10px] font-semibold uppercase tracking-wide ${headerColor}`}>
-        {label} ({findings.length})
-      </p>
-      {findings.map(({ finding, originalIndex }) => (
-        <FindingItem
-          key={originalIndex}
-          finding={finding}
-          index={originalIndex}
-          selected={selectedIndices.has(originalIndex)}
-          onToggle={onToggle}
-        />
-      ))}
+    <div className="flex items-center gap-2 pt-2">
+      <span>{icon}</span>
+      <h3 className="font-bold text-sm" style={{ color }}>
+        {title} ({count})
+      </h3>
     </div>
   );
 }
@@ -153,7 +85,7 @@ export function ResultState({
 }: ResultStateProps) {
   const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
 
-  // Reset selection when result changes — pre-select all error-level fixable findings
+  // Pre-select all error-level fixable findings
   useEffect(() => {
     if (!result) return;
     const initial = new Set(
@@ -174,131 +106,140 @@ export function ResultState({
     });
   };
 
-  // Group findings by severity
-  const groups = (["error", "warning", "info"] as const).map((type) => ({
-    type,
-    findings: (result?.findings ?? [])
-      .map((f, i) => ({ finding: f, originalIndex: i }))
-      .filter(({ finding }) => finding.type === type),
-  }));
+  // Group findings
+  const errors = (result?.findings ?? [])
+    .map((f, i) => ({ finding: f, idx: i }))
+    .filter(({ finding }) => finding.type === "error");
+  const warnings = (result?.findings ?? [])
+    .map((f, i) => ({ finding: f, idx: i }))
+    .filter(({ finding }) => finding.type === "warning");
 
   const fixableCount = result?.findings.filter((f) => f.autoFixData).length ?? 0;
   const selectedFindings = result?.findings.filter((_, i) => selectedIndices.has(i)) ?? [];
   const selectedCount = selectedFindings.length;
 
+  // Calculate passing checks from checks data
+  const passingChecks: string[] = [];
+  if (result) {
+    if (result.checks.props.pass) passingChecks.push("Component Structure");
+    if (result.checks.tokens.pass) passingChecks.push("Design Tokens");
+    if (result.checks.a11y.pass) passingChecks.push("Accessibility");
+    if (result.checks.props.passed > 0 && !result.checks.props.pass) passingChecks.push("Naming Convention");
+  }
+
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-        <button onClick={onBack} className="text-gray-400 hover:text-gray-600 text-xs">
+      <div className="flex items-center justify-between px-4 py-3 border-b-2 border-propper-200">
+        <button
+          onClick={onBack}
+          className="text-propper-600 hover:text-propper-700 text-xs font-bold border border-propper-200 px-2.5 py-1 hover:border-propper-400 transition-colors"
+        >
           ← Back
         </button>
-        <span className="text-xs font-medium text-gray-700 truncate max-w-[180px]">
-          {componentData?.name ?? "Component"}
-        </span>
-        <button onClick={onReaudit} className="text-sky-600 hover:text-sky-700 text-xs">
-          Re-run
-        </button>
+        <span className="font-display text-lg text-propper-700">Assessment</span>
+        <div className="w-14" />
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {error && (
-          <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">
-            <strong>Connection error:</strong> {error}
+          <div className="text-xs text-red-700 bg-red-50 border-2 border-red-200 p-3 font-bold">
+            Connection error: {error}
           </div>
         )}
 
         {result && (
           <>
-            {/* Score */}
-            <div className="flex items-center gap-4">
-              <ScoreRing score={result.score} />
-              <div>
-                <p className="text-sm font-semibold text-gray-900">
-                  {result.score >= 80
-                    ? "Looking sharp!"
-                    : result.score >= 50
-                    ? "Needs attention"
-                    : "Needs work"}
-                </p>
-                <p className="text-[11px] text-gray-500">{result.componentType}</p>
-              </div>
-            </div>
-
-            {/* Check scores */}
-            <div className="bg-gray-50 rounded-lg px-3 py-2">
-              <CheckRow
-                label="Props"
-                passed={result.checks.props.passed}
-                total={result.checks.props.total}
-              />
-              <CheckRow
-                label="Accessibility"
-                passed={result.checks.a11y.passed}
-                total={result.checks.a11y.total}
-              />
-              <CheckRow
-                label="Tokens"
-                passed={result.checks.tokens.passed}
-                total={result.checks.tokens.total || 1}
-              />
-            </div>
-
-            {/* Findings grouped by severity */}
-            {result.findings.length > 0 && (
-              <div className="space-y-3">
-                <p className="text-xs font-semibold text-gray-700">
-                  Issues ({result.findings.length})
-                  {fixableCount > 0 && (
-                    <span className="ml-1 font-normal text-gray-400">
-                      — select which to fix
-                    </span>
-                  )}
-                </p>
-                {groups.map(({ type, findings }) => (
-                  <FindingGroup
-                    key={type}
-                    type={type}
-                    findings={findings}
-                    selectedIndices={selectedIndices}
+            {/* Critical issues */}
+            {errors.length > 0 && (
+              <div className="space-y-2">
+                <SectionHeader icon="🚫" title="Critical Issues" count={errors.length} color="#dc2626" />
+                {errors.map(({ finding, idx }) => (
+                  <FindingCard
+                    key={idx}
+                    finding={finding}
+                    index={idx}
+                    selected={selectedIndices.has(idx)}
                     onToggle={toggleFinding}
                   />
                 ))}
               </div>
             )}
 
+            {/* Warnings */}
+            {warnings.length > 0 && (
+              <div className="space-y-2">
+                <SectionHeader icon="⚠️" title="Warnings" count={warnings.length} color="#d97706" />
+                {warnings.map(({ finding, idx }) => (
+                  <FindingCard
+                    key={idx}
+                    finding={finding}
+                    index={idx}
+                    selected={selectedIndices.has(idx)}
+                    onToggle={toggleFinding}
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Passing checks */}
+            {passingChecks.length > 0 && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 pt-2">
+                  <span>✅</span>
+                  <h3 className="font-bold text-sm text-green-700">Passing Checks</h3>
+                </div>
+                <ul className="pl-6 space-y-1.5">
+                  {passingChecks.map((check) => (
+                    <li key={check} className="text-xs text-propper-400 flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+                      {check}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* All clear */}
             {result.findings.length === 0 && (
-              <div className="text-xs text-green-700 bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                ✓ All checks passed — ready for handoff!
+              <div className="text-center py-8 space-y-3 animate-slide-up">
+                <span className="text-4xl">🎉</span>
+                <p className="font-bold text-sm text-green-700">All checks passed!</p>
+                <p className="text-xs text-propper-400">This component is ready for handoff.</p>
               </div>
             )}
           </>
         )}
       </div>
 
-      {/* Footer: Make it Propper CTA */}
-      {result && fixableCount > 0 && (
-        <div className="px-4 py-3 border-t border-gray-100">
-          {scaffoldDone ? (
-            <div className="text-xs text-green-700 text-center py-1">
-              ✓ Scaffolded {selectedCount} prop{selectedCount !== 1 ? "s" : ""}! Re-run audit to verify.
-            </div>
-          ) : (
-            <button
-              onClick={() => onScaffold(selectedFindings)}
-              disabled={scaffolding || selectedCount === 0}
-              className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
-            >
-              {scaffolding
-                ? "straightening your tie..."
-                : selectedCount === 0
-                ? "Select props to fix"
-                : `Make it Propper — fix ${selectedCount} prop${selectedCount !== 1 ? "s" : ""}`}
-            </button>
-          )}
-        </div>
-      )}
+      {/* Footer */}
+      <div className="px-4 pb-4 pt-2 space-y-2">
+        {result && fixableCount > 0 && !scaffoldDone && (
+          <button
+            onClick={() => onScaffold(selectedFindings)}
+            disabled={scaffolding || selectedCount === 0}
+            className="btn-primary w-full h-11 text-xs"
+          >
+            {scaffolding
+              ? "Fixing..."
+              : selectedCount === 0
+              ? "Select issues to fix"
+              : `Fix ${selectedCount} issue${selectedCount !== 1 ? "s" : ""}`}
+          </button>
+        )}
+        {scaffoldDone && (
+          <div className="text-center py-2 text-xs font-bold text-green-700 animate-fade-in">
+            ✓ Fixed! Re-scan to verify.
+          </div>
+        )}
+        <button
+          onClick={onReaudit}
+          className="btn-primary w-full h-12 text-sm"
+        >
+          Re-scan
+        </button>
+      </div>
     </div>
   );
 }

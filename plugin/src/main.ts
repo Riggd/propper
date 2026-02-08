@@ -8,7 +8,7 @@ import type {
 
 // Plugma requires a default export function as the entry point
 export default function () {
-  figma.showUI(__html__, { width: 360, height: 520, title: "Propper" });
+  figma.showUI(__html__, { width: 420, height: 640, title: "Propper" });
 
   // --- Helpers ---
 

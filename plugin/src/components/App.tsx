@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
-import type { PluginState, AuditResult, ExtractedComponentData, MainToUI } from "../types";
+import type { PluginState, AuditResult, ExtractedComponentData, MainToUI, TargetFramework } from "../types";
 import { IdleState } from "./IdleState";
 import { AuditingState } from "./AuditingState";
+import { SummaryState } from "./SummaryState";
 import { ResultState } from "./ResultState";
 import { EmptyState } from "./EmptyState";
 
@@ -14,6 +15,7 @@ export function App() {
   const [error, setError] = useState<string | null>(null);
   const [scaffolding, setScaffolding] = useState(false);
   const [scaffoldDone, setScaffoldDone] = useState(false);
+  const [framework, setFramework] = useState<TargetFramework>("react-shadcn");
 
   // Listen for messages from the plugin main thread
   useEffect(() => {
@@ -23,8 +25,11 @@ export function App() {
 
       switch (msg.type) {
         case "COMPONENT_DATA":
+          // Optimistic: show the component in idle state immediately
           setComponentData(msg.payload);
           runAudit(msg.payload);
+          // Don't auto-run audit — let user click "Make this Propper"
+          setState("idle");
           break;
         case "NO_SELECTION":
           setState("empty");
@@ -33,12 +38,15 @@ export function App() {
           // Different component selected — reset so they audit the new one
           setState("idle");
           setComponentData(null);
+          // Different component selected — stay on idle, request new data
           setAuditResult(null);
           setError(null);
           setScaffoldDone(false);
+          // Request the new component's data to show in preview
+          parent.postMessage({ pluginMessage: { type: "GET_COMPONENT_DATA" } }, "*");
           break;
         case "SELECTION_CLEARED":
-          // Nothing selected — return to idle
+          // Nothing selected — return to idle with no data
           setState("idle");
           setComponentData(null);
           setAuditResult(null);
@@ -60,6 +68,11 @@ export function App() {
     return () => window.removeEventListener("message", handler);
   }, []);
 
+  // On mount, request component data to check if something is already selected
+  useEffect(() => {
+    parent.postMessage({ pluginMessage: { type: "GET_COMPONENT_DATA" } }, "*");
+  }, []);
+
   const runAudit = useCallback(async (data: ExtractedComponentData) => {
     setState("auditing");
     setError(null);
@@ -78,14 +91,14 @@ export function App() {
 
       const result: AuditResult = await response.json();
       setAuditResult(result);
-      setState("result");
+      setState("summary");
     } catch (err) {
       setError(
         err instanceof Error
           ? err.message
           : "Could not connect to Propper proxy. Make sure it's running on port 3333."
       );
-      setState("result");
+      setState("assessment");
     }
   }, []);
 
@@ -93,6 +106,15 @@ export function App() {
     setState("auditing");
     parent.postMessage({ pluginMessage: { type: "GET_COMPONENT_DATA" } }, "*");
   }, []);
+
+  // const handleAudit = useCallback(() => {
+  //   if (componentData) {
+  //     runAudit(componentData);
+  //   } else {
+  //     setState("auditing");
+  //     parent.postMessage({ pluginMessage: { type: "GET_COMPONENT_DATA" } }, "*");
+  //   }
+  // }, [componentData, runAudit]);
 
   const handleScaffold = useCallback((findings: import("../types").AuditFinding[]) => {
     if (findings.length === 0) return;
@@ -119,10 +141,32 @@ export function App() {
 
   switch (state) {
     case "idle":
-      return <IdleState onAudit={handleAudit} />;
+      return (
+        <IdleState
+          onAudit={handleAudit}
+          framework={framework}
+          onFrameworkChange={setFramework}
+          componentData={componentData}
+        />
+      );
     case "auditing":
-      return <AuditingState />;
-    case "result":
+      return (
+        <AuditingState
+          componentName={componentData?.name}
+          framework={framework}
+        />
+      );
+    case "summary":
+      return auditResult ? (
+        <SummaryState
+          componentData={componentData}
+          result={auditResult}
+          framework={framework}
+          onViewDetails={() => setState("assessment")}
+          onBack={() => setState("idle")}
+        />
+      ) : null;
+    case "assessment":
       return (
         <ResultState
           componentData={componentData}
@@ -132,7 +176,7 @@ export function App() {
           scaffoldDone={scaffoldDone}
           onScaffold={handleScaffold}
           onReaudit={handleReaudit}
-          onBack={() => setState("idle")}
+          onBack={() => setState(auditResult ? "summary" : "idle")}
         />
       );
     case "empty":

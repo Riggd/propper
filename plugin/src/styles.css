@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Jaro:opsz@6..72&family=Inter:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,7 +15,90 @@
     font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 12px;
     background: #ffffff;
-    color: #1a1a1a;
+    color: #0f172b;
     overflow: hidden;
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #cad5e2;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #62748e;
+  }
+}
+
+@layer components {
+  /* Neo-brutalist button base */
+  .btn-brutal {
+    @apply font-bold text-sm uppercase tracking-wider border-2 border-black transition-all duration-150;
+    letter-spacing: 0.05em;
+  }
+  .btn-brutal:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0px 0px 0px 0px black;
+  }
+
+  /* Primary blue button */
+  .btn-primary {
+    @apply btn-brutal bg-propper-600 text-white shadow-brutal;
+  }
+  .btn-primary:hover {
+    @apply bg-[#1490e0];
+  }
+  .btn-primary:active {
+    @apply bg-[#1280cc];
+  }
+  .btn-primary:disabled {
+    @apply bg-[#c1c1c1] border-[#c1c1c1] shadow-brutal-gray cursor-not-allowed text-white;
+  }
+  .btn-primary:disabled:active {
+    transform: none;
+    box-shadow: 4px 4px 0px 0px #7d7d7d;
+  }
+
+  /* Secondary outline button */
+  .btn-secondary {
+    @apply btn-brutal bg-white text-propper-700 shadow-brutal-sm;
+  }
+  .btn-secondary:hover {
+    @apply bg-propper-100;
+  }
+
+  /* Framework selection card */
+  .framework-card {
+    @apply flex items-center gap-3 px-3.5 py-3 border-2 border-propper-200 bg-white rounded-none transition-all duration-150 cursor-pointer;
+    box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.1), 0px 1px 2px 0px rgba(0,0,0,0.1);
+  }
+  .framework-card[aria-checked="true"] {
+    @apply border-black bg-propper-100 shadow-brutal-sm;
+  }
+  .framework-card:hover {
+    @apply border-propper-400;
+  }
+
+  /* Component preview drop zone */
+  .drop-zone {
+    @apply border-2 border-dashed border-propper-300 bg-propper-100 flex items-center justify-center;
+  }
+  .drop-zone--active {
+    @apply border-[#ce71db];
+  }
+
+  /* Score ring */
+  .score-ring-bg { stroke: #e2e8f0; }
+  .score-ring-fill { transition: stroke-dashoffset 1s ease-out; }
+
+  /* Finding card */
+  .finding-card {
+    @apply border-l-4 bg-white px-4 py-3 rounded-r;
+    box-shadow: 0px 1px 3px 0px rgba(0,0,0,0.06);
   }
 }

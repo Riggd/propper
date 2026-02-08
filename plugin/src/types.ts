@@ -1,6 +1,21 @@
-export type PluginState = "idle" | "auditing" | "result" | "empty";
+export type PluginState = "idle" | "auditing" | "summary" | "assessment" | "empty";
 
 export type RequirementLevel = "error" | "warning" | "info";
+
+export type TargetFramework = "react-shadcn" | "react-tailwind" | "custom";
+
+export interface FrameworkOption {
+  id: TargetFramework;
+  name: string;
+  description: string;
+  icon: string;
+}
+
+export const FRAMEWORK_OPTIONS: FrameworkOption[] = [
+  { id: "react-shadcn", name: "React + shadcn/ui", description: "Standard library", icon: "⚙️" },
+  { id: "react-tailwind", name: "React + Tailwind", description: "Utility classes", icon: "🎨" },
+  { id: "custom", name: "Custom", description: "Your configuration", icon: "⟨/⟩" },
+];
 
 export interface FigmaComponentProperty {
   type: "BOOLEAN" | "VARIANT" | "TEXT" | "INSTANCE_SWAP";

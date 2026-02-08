@@ -1,33 +1,94 @@
+import type { TargetFramework, ExtractedComponentData } from "../types";
+import { FRAMEWORK_OPTIONS } from "../types";
+
 interface IdleStateProps {
   onAudit: () => void;
+  framework: TargetFramework;
+  onFrameworkChange: (fw: TargetFramework) => void;
+  componentData: ExtractedComponentData | null;
 }
 
-export function IdleState({ onAudit }: IdleStateProps) {
+function FrameworkIcon({ icon }: { icon: string }) {
   return (
-    <div className="flex flex-col items-center justify-center h-screen px-6 text-center gap-5">
-      {/* Logo */}
-      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-sky-700 flex items-center justify-center shadow-md">
-        <span className="text-white text-xl font-bold">P</span>
+    <div className="w-8 h-8 rounded-full bg-white border border-propper-200 shadow-soft flex items-center justify-center shrink-0">
+      <span className="text-sm">{icon}</span>
+    </div>
+  );
+}
+
+export function IdleState({ onAudit, framework, onFrameworkChange, componentData }: IdleStateProps) {
+  const hasSelection = !!componentData;
+
+  return (
+    <div className="flex flex-col h-screen animate-fade-in">
+      {/* Content area */}
+      <div className="flex-1 flex flex-col px-4 pt-4 pb-4 gap-6 overflow-y-auto">
+        {/* Header */}
+        <h1 className="font-display text-4xl text-propper-700 text-center leading-tight">
+          Propper Design &amp; Dev
+        </h1>
+
+        {/* Component preview zone */}
+        <div
+          className={`drop-zone h-44 flex-col gap-2 rounded-none ${
+            hasSelection ? "drop-zone--active" : ""
+          }`}
+        >
+          {hasSelection ? (
+            <div className="flex flex-col items-center gap-2 animate-fade-in">
+              <div className="bg-white border-2 border-black shadow-brutal-sm px-4 py-2">
+                <span className="font-bold text-xs text-propper-700 uppercase tracking-wide">
+                  {componentData.name}
+                </span>
+              </div>
+              <span className="text-[10px] text-propper-400 uppercase tracking-wider">
+                {componentData.type}
+              </span>
+            </div>
+          ) : (
+            <span className="text-[11px] text-propper-400 uppercase tracking-widest font-bold">
+              Select a component or frame to modernise
+            </span>
+          )}
+        </div>
+
+        {/* Framework selection */}
+        <div className="flex flex-col gap-2">
+          <label className={`font-bold text-xs text-propper-700 ${!hasSelection ? "opacity-20" : ""}`}>
+            Target Framework
+          </label>
+          <div className={`flex flex-col gap-2 ${!hasSelection ? "opacity-20 pointer-events-none" : ""}`}>
+            {FRAMEWORK_OPTIONS.map((opt) => (
+              <button
+                key={opt.id}
+                type="button"
+                role="radio"
+                aria-checked={framework === opt.id}
+                className="framework-card"
+                onClick={() => onFrameworkChange(opt.id)}
+                disabled={!hasSelection}
+              >
+                <FrameworkIcon icon={opt.icon} />
+                <div className="flex flex-col items-start">
+                  <span className="font-bold text-[11px] text-propper-700">{opt.name}</span>
+                  <span className="font-bold text-[10px] text-propper-400">{opt.description}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-1">
-        <h1 className="text-base font-semibold text-gray-900">Propper</h1>
-        <p className="text-xs text-gray-500 leading-relaxed max-w-[220px]">
-          Select a component layer in Figma and click Audit to check it for code-readiness.
-        </p>
+      {/* Sticky CTA button */}
+      <div className="px-4 pb-4 pt-2">
+        <button
+          onClick={onAudit}
+          disabled={!hasSelection}
+          className="btn-primary w-full h-12 text-sm"
+        >
+          Make this Propper
+        </button>
       </div>
-
-      <button
-        onClick={onAudit}
-        className="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
-      >
-        Audit Component
-      </button>
-
-      <p className="text-[10px] text-gray-400">
-        Make sure the Propper proxy is running on{" "}
-        <code className="font-mono">:3333</code>
-      </p>
     </div>
   );
 }
