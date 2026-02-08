@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import type { AuditResult, AuditFinding, ExtractedComponentData } from "../types";
 
 interface ResultStateProps {
@@ -6,7 +7,7 @@ interface ResultStateProps {
   error: string | null;
   scaffolding: boolean;
   scaffoldDone: boolean;
-  onScaffold: () => void;
+  onScaffold: (findings: AuditFinding[]) => void;
   onReaudit: () => void;
   onBack: () => void;
 }
@@ -51,18 +52,91 @@ function CheckRow({
   );
 }
 
-function FindingItem({ finding }: { finding: AuditFinding }) {
-  const colors = {
-    error: "bg-red-50 border-red-200 text-red-700",
-    warning: "bg-amber-50 border-amber-200 text-amber-700",
-    info: "bg-blue-50 border-blue-200 text-blue-700",
-  };
-  const badges = { error: "ERR", warning: "WARN", info: "INFO" };
+const SEVERITY_CONFIG = {
+  error: {
+    label: "Errors",
+    colors: "bg-red-50 border-red-200 text-red-700",
+    badge: "ERR",
+    headerColor: "text-red-700",
+  },
+  warning: {
+    label: "Warnings",
+    colors: "bg-amber-50 border-amber-200 text-amber-700",
+    badge: "WARN",
+    headerColor: "text-amber-700",
+  },
+  info: {
+    label: "Info",
+    colors: "bg-blue-50 border-blue-200 text-blue-700",
+    badge: "INFO",
+    headerColor: "text-blue-700",
+  },
+} as const;
+
+function FindingItem({
+  finding,
+  index,
+  selected,
+  onToggle,
+}: {
+  finding: AuditFinding;
+  index: number;
+  selected: boolean;
+  onToggle: (i: number) => void;
+}) {
+  const { colors, badge } = SEVERITY_CONFIG[finding.type];
+  const fixable = !!finding.autoFixData;
 
   return (
-    <div className={`text-[11px] px-2 py-1.5 rounded border ${colors[finding.type]}`}>
-      <span className="font-semibold mr-1.5">[{badges[finding.type]}]</span>
-      {finding.message}
+    <label
+      className={`flex items-start gap-2 text-[11px] px-2 py-1.5 rounded border ${colors} ${fixable ? "cursor-pointer" : ""}`}
+    >
+      {fixable ? (
+        <input
+          type="checkbox"
+          className="mt-0.5 shrink-0 accent-current"
+          checked={selected}
+          onChange={() => onToggle(index)}
+        />
+      ) : (
+        <span className="w-3.5 shrink-0" />
+      )}
+      <span>
+        <span className="font-semibold mr-1">[{badge}]</span>
+        {finding.message}
+      </span>
+    </label>
+  );
+}
+
+function FindingGroup({
+  type,
+  findings,
+  selectedIndices,
+  onToggle,
+}: {
+  type: keyof typeof SEVERITY_CONFIG;
+  findings: Array<{ finding: AuditFinding; originalIndex: number }>;
+  selectedIndices: Set<number>;
+  onToggle: (i: number) => void;
+}) {
+  if (findings.length === 0) return null;
+  const { label, headerColor } = SEVERITY_CONFIG[type];
+
+  return (
+    <div className="space-y-1">
+      <p className={`text-[10px] font-semibold uppercase tracking-wide ${headerColor}`}>
+        {label} ({findings.length})
+      </p>
+      {findings.map(({ finding, originalIndex }) => (
+        <FindingItem
+          key={originalIndex}
+          finding={finding}
+          index={originalIndex}
+          selected={selectedIndices.has(originalIndex)}
+          onToggle={onToggle}
+        />
+      ))}
     </div>
   );
 }
@@ -77,7 +151,40 @@ export function ResultState({
   onReaudit,
   onBack,
 }: ResultStateProps) {
+  const [selectedIndices, setSelectedIndices] = useState<Set<number>>(new Set());
+
+  // Reset selection when result changes — pre-select all error-level fixable findings
+  useEffect(() => {
+    if (!result) return;
+    const initial = new Set(
+      result.findings
+        .map((f, i) => ({ f, i }))
+        .filter(({ f }) => f.type === "error" && !!f.autoFixData)
+        .map(({ i }) => i)
+    );
+    setSelectedIndices(initial);
+  }, [result]);
+
+  const toggleFinding = (index: number) => {
+    setSelectedIndices((prev) => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
+
+  // Group findings by severity
+  const groups = (["error", "warning", "info"] as const).map((type) => ({
+    type,
+    findings: (result?.findings ?? [])
+      .map((f, i) => ({ finding: f, originalIndex: i }))
+      .filter(({ finding }) => finding.type === type),
+  }));
+
   const fixableCount = result?.findings.filter((f) => f.autoFixData).length ?? 0;
+  const selectedFindings = result?.findings.filter((_, i) => selectedIndices.has(i)) ?? [];
+  const selectedCount = selectedFindings.length;
 
   return (
     <div className="flex flex-col h-screen">
@@ -138,14 +245,25 @@ export function ResultState({
               />
             </div>
 
-            {/* Findings */}
+            {/* Findings grouped by severity */}
             {result.findings.length > 0 && (
-              <div className="space-y-1.5">
+              <div className="space-y-3">
                 <p className="text-xs font-semibold text-gray-700">
                   Issues ({result.findings.length})
+                  {fixableCount > 0 && (
+                    <span className="ml-1 font-normal text-gray-400">
+                      — select which to fix
+                    </span>
+                  )}
                 </p>
-                {result.findings.map((f, i) => (
-                  <FindingItem key={i} finding={f} />
+                {groups.map(({ type, findings }) => (
+                  <FindingGroup
+                    key={type}
+                    type={type}
+                    findings={findings}
+                    selectedIndices={selectedIndices}
+                    onToggle={toggleFinding}
+                  />
                 ))}
               </div>
             )}
@@ -164,15 +282,19 @@ export function ResultState({
         <div className="px-4 py-3 border-t border-gray-100">
           {scaffoldDone ? (
             <div className="text-xs text-green-700 text-center py-1">
-              ✓ Scaffolded {fixableCount} prop{fixableCount !== 1 ? "s" : ""}! Re-run audit to verify.
+              ✓ Scaffolded {selectedCount} prop{selectedCount !== 1 ? "s" : ""}! Re-run audit to verify.
             </div>
           ) : (
             <button
-              onClick={onScaffold}
-              disabled={scaffolding}
+              onClick={() => onScaffold(selectedFindings)}
+              disabled={scaffolding || selectedCount === 0}
               className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 active:bg-sky-800 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
             >
-              {scaffolding ? "straightening your tie..." : `Make it Propper ${fixableCount} Missing Prop${fixableCount !== 1 ? "s" : ""}`}
+              {scaffolding
+                ? "straightening your tie..."
+                : selectedCount === 0
+                ? "Select props to fix"
+                : `Make it Propper — fix ${selectedCount} prop${selectedCount !== 1 ? "s" : ""}`}
             </button>
           )}
         </div>

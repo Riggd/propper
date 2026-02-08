@@ -94,22 +94,20 @@ export function App() {
     parent.postMessage({ pluginMessage: { type: "GET_COMPONENT_DATA" } }, "*");
   }, []);
 
-  const handleScaffold = useCallback(() => {
-    if (!auditResult) return;
-    const fixableFindings = auditResult.findings.filter((f) => f.autoFixData);
-    if (fixableFindings.length === 0) return;
+  const handleScaffold = useCallback((findings: import("../types").AuditFinding[]) => {
+    if (findings.length === 0) return;
 
     setScaffolding(true);
     parent.postMessage(
       {
         pluginMessage: {
           type: "SCAFFOLD",
-          payload: { findings: fixableFindings },
+          payload: { findings },
         },
       },
       "*"
     );
-  }, [auditResult]);
+  }, []);
 
   const handleReaudit = useCallback(() => {
     if (!componentData) {
