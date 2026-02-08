@@ -114,8 +114,9 @@ export default function () {
     const frame = figma.createFrame();
     frame.name = "_Code Only Props";
     frame.resize(0.01, 0.01);
+    frame.x = 0;
+    frame.y = 0;
     frame.locked = true;
-    frame.layoutPositioning = "ABSOLUTE";
     frame.layoutMode = "VERTICAL";
     frame.itemSpacing = 4;
     frame.paddingLeft = 8;
