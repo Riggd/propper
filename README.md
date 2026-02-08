@@ -7,16 +7,15 @@ Propper audits Figma components for code-readiness before handoff — checking f
 ## Have a proper good time
 
 ```bash
-# Start the rules engine
-cd proxy && npm install && npm run dev
+# Install dependencies from root of project
+npm i
+
+# Start the rules engine and the Figma plugin (requires Figma Desktop) and the CLI
+npm run dev
 # → http://localhost:3333
 
-# Run the Figma plugin (requires Figma Desktop)
-cd plugin && npm install && npm run dev
-
 # Or audit from the CLI
-cd cli && npm install
-npx tsx cli/src/index.ts audit "https://www.figma.com/file/..."
+npm run audit:figma -- "https://www.figma.com/file/..."
 ```
 
 ### CLI: Figma token setup
@@ -46,12 +45,12 @@ echo "FIGMA_TOKEN=your_token" >> .env  # project .env file
 
 ## Packages
 
-| Package | Description |
-|---------|-------------|
-| `proxy/` | Local Express rules engine (port 3333) |
-| `plugin/` | Figma plugin (plugma + React + Tailwind) |
-| `cli/` | Developer CLI for auditing from the terminal |
+| Package   | Description                                  |
+| --------- | -------------------------------------------- |
+| `proxy/`  | Local Express rules engine (port 3333)       |
+| `plugin/` | Figma plugin (plugma + React + Tailwind)     |
+| `cli/`    | Developer CLI for auditing from the terminal |
 
 ---
 
-*Proper handoff. Proper components. Proper good time.*
+_Proper handoff. Proper components. Proper good time._

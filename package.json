@@ -6,11 +6,12 @@
   "workspaces": ["proxy", "plugin", "cli"],
   "scripts": {
     "dev": "npm run dev -w proxy -w plugin",
-    "dev:proxy": "npm run dev --workspace=proxy",
-    "dev:plugin": "npm run dev --workspace=plugin",
-    "build:proxy": "npm run build --workspace=proxy",
-    "build:plugin": "npm run build --workspace=plugin",
-    "build:cli": "npm run build --workspace=cli",
-    "build": "npm run build -w proxy -w plugin && npm run build:cli"
+    "dev:proxy": "npm run dev -w proxy",
+    "dev:plugin": "npm run dev -w plugin",
+    "build:proxy": "npm run build -w proxy",
+    "build:plugin": "npm run build -w plugin",
+    "build:cli": "npm run build -w cli",
+    "build": "npm run build -w proxy -w plugin && npm run build:cli",
+    "audit:figma": "npx tsx cli/src/index.ts audit"
   }
 }
