@@ -16,9 +16,26 @@ cd plugin && npm install && npm run dev
 
 # Or audit from the CLI
 cd cli && npm install
-export FIGMA_TOKEN=your_token
 npx tsx cli/src/index.ts audit "https://www.figma.com/file/..."
 ```
+
+### CLI: Figma token setup
+
+The CLI needs a Figma personal access token. Set it once and forget it:
+
+```bash
+npx tsx cli/src/index.ts config set-token
+# Figma personal access token: (paste — hidden, won't appear in history)
+```
+
+Token is saved to `~/.propper`. Alternatively, use an env var or `.env` file:
+
+```bash
+export FIGMA_TOKEN=your_token        # shell session
+echo "FIGMA_TOKEN=your_token" >> .env  # project .env file
+```
+
+> Get your token in Figma: **Settings → Personal access tokens → Generate token**
 
 ## What it does
 
