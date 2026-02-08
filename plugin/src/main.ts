@@ -115,6 +115,7 @@ export default function () {
     frame.name = "_Code Only Props";
     frame.resize(0.01, 0.01);
     frame.locked = true;
+    frame.layoutPositioning = "ABSOLUTE";
     frame.layoutMode = "VERTICAL";
     frame.itemSpacing = 4;
     frame.paddingLeft = 8;
